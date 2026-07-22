@@ -1,0 +1,151 @@
+/**
+ * BLT Documents — admin styles.
+ */
+
+.blt-doc-admin-layout {
+	display: flex;
+	gap: 24px;
+	align-items: flex-start;
+	margin-top: 16px;
+}
+
+.blt-doc-sidebar {
+	flex: 0 0 240px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	padding: 16px;
+}
+
+.blt-doc-sidebar h2 {
+	margin-top: 0;
+	font-size: 14px;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: #50575e;
+}
+
+.blt-doc-main {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.blt-doc-folder-list {
+	margin: 0 0 16px;
+	padding: 0;
+	list-style: none;
+}
+
+.blt-doc-folder-list li {
+	margin: 0;
+	border-radius: 4px;
+}
+
+.blt-doc-folder-list li a {
+	display: block;
+	padding: 8px 10px;
+	text-decoration: none;
+	color: #2271b1;
+	border-radius: 4px;
+}
+
+.blt-doc-folder-list li.is-active a {
+	background: #2271b1;
+	color: #fff;
+	font-weight: 600;
+}
+
+.blt-doc-folder-list li.blt-doc-muted,
+.blt-doc-muted {
+	color: #787c82;
+	padding: 8px 10px;
+}
+
+.blt-doc-panel {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	padding: 16px 20px;
+	margin-bottom: 20px;
+}
+
+.blt-doc-panel h2 {
+	margin-top: 0;
+}
+
+.blt-doc-folder-head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.blt-doc-folder-head h2 {
+	margin: 0;
+}
+
+.blt-doc-folder-tools {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.blt-doc-inline-form {
+	display: inline-flex;
+	gap: 6px;
+	align-items: center;
+	margin: 0;
+}
+
+.blt-doc-shortcode {
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.blt-doc-shortcode input.code {
+	max-width: 420px;
+}
+
+.blt-doc-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+}
+
+.blt-doc-actions .blt-doc-inline-form {
+	display: inline;
+}
+
+.blt-doc-test-result {
+	margin-left: 10px;
+	font-weight: 600;
+}
+
+.blt-doc-test-result.is-ok {
+	color: #007017;
+}
+
+.blt-doc-test-result.is-error {
+	color: #b32d2e;
+}
+
+.blt-doc-current-tag {
+	color: #007017;
+	font-weight: 600;
+	font-size: 0.9em;
+}
+
+@media screen and (max-width: 782px) {
+	.blt-doc-admin-layout {
+		display: block;
+	}
+
+	.blt-doc-sidebar {
+		flex-basis: auto;
+		margin-bottom: 20px;
+	}
+}

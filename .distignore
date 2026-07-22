@@ -1,0 +1,19 @@
+# Patterns anchored with a leading slash so they only match at repo root and
+# never strip the bundled plugin-update-checker's own files under includes/lib.
+/.git
+/.github
+/.gitignore
+/.distignore
+/.phpunit.result.cache
+/build
+/node_modules
+/tests
+/tasks
+/worker
+/composer.json
+/composer.lock
+/phpcs.xml.dist
+/phpunit.xml.dist
+/AGENTS.md
+/README.md
+/CLAUDE.md

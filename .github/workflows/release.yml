@@ -1,0 +1,86 @@
+name: Release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump level'
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+permissions:
+  contents: write
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Determine bump level
+        id: level
+        run: |
+          LEVEL="${{ github.event.inputs.bump }}"
+          if [ -z "$LEVEL" ]; then
+            LEVEL=patch
+            RANGE="${{ github.event.before }}..${{ github.sha }}"
+            if ! MESSAGES=$(git log --format=%B "$RANGE" 2>/dev/null); then
+              MESSAGES=$(git log -1 --format=%B "${{ github.sha }}")
+            fi
+            case "$MESSAGES" in
+              *'#major'*) LEVEL=major ;;
+              *'#minor'*) LEVEL=minor ;;
+            esac
+          fi
+          echo "level=$LEVEL" >> "$GITHUB_OUTPUT"
+      - name: Bump version
+        id: bump
+        run: |
+          VERSION=$(php .github/scripts/bump-version.php "${{ steps.level.outputs.level }}")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Sanity-check version consistency
+        run: |
+          V="${{ steps.bump.outputs.version }}"
+          php -l blt-documents.php
+          grep -q "^ \* Version:[[:space:]]*${V}\$" blt-documents.php
+          grep -q "define( 'BLT_DOCUMENTS_VERSION', '${V}' );" blt-documents.php
+          grep -q "^Stable tag: ${V}\$" readme.txt
+      - name: Commit, tag, push
+        run: |
+          V="${{ steps.bump.outputs.version }}"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore(release): v${V} [skip ci]"
+          git tag "v${V}"
+          git pull --rebase origin main
+          git push origin main --follow-tags
+      - name: Build distribution zip
+        run: |
+          V="${{ steps.bump.outputs.version }}"
+          mkdir -p build/blt-documents
+          rsync -a --exclude-from=.distignore --exclude=.git --exclude=.github ./ build/blt-documents/
+          cd build && zip -rq "blt-documents-${V}.zip" blt-documents
+      - name: Verify zip contents
+        run: |
+          V="${{ steps.bump.outputs.version }}"
+          Z="build/blt-documents-${V}.zip"
+          LIST=$(unzip -l "$Z")
+          echo "$LIST" | awk '{print $4}' | grep -q '^blt-documents/blt-documents\.php$'
+          echo "$LIST" | grep -q 'blt-documents/includes/lib/plugin-update-checker/plugin-update-checker\.php'
+          ! echo "$LIST" | grep -qE 'blt-documents/(tests|tasks|worker|vendor)/'
+          unzip -p "$Z" blt-documents/blt-documents.php | grep -q "Version:[[:space:]]*${V}"
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.bump.outputs.version }}"
+          gh release create "v${V}" --repo "$GITHUB_REPOSITORY" --title "v${V}" --generate-notes --target main "build/blt-documents-${V}.zip"

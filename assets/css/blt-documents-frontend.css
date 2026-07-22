@@ -1,0 +1,143 @@
+/**
+ * BLT Documents — front-end table styles.
+ *
+ * Self-contained and framework-agnostic: no ACSS / automatic.css utilities or
+ * theme variables are assumed, so the table renders consistently under any
+ * theme or page builder. All rules are scoped under .blt-doc-*.
+ */
+
+.blt-doc-wrap {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.blt-doc-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 0;
+	font-size: 1rem;
+	line-height: 1.4;
+}
+
+.blt-doc-table th,
+.blt-doc-table td {
+	text-align: left;
+	padding: 0.75em 1em;
+	vertical-align: middle;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.blt-doc-table thead th {
+	font-weight: 600;
+	border-bottom-width: 2px;
+	white-space: nowrap;
+}
+
+.blt-doc-col-download,
+.blt-doc-download {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.blt-doc-badge {
+	display: inline-block;
+	padding: 0.15em 0.6em;
+	border-radius: 999px;
+	background: rgba(0, 0, 0, 0.06);
+	font-size: 0.85em;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	white-space: nowrap;
+}
+
+.blt-doc-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.45em 0.9em;
+	border-radius: 6px;
+	background: #1f2937;
+	color: #fff;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 0.9em;
+	line-height: 1;
+	transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.blt-doc-btn:hover,
+.blt-doc-btn:focus {
+	background: #111827;
+	color: #fff;
+	text-decoration: none;
+}
+
+.blt-doc-btn:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+.blt-doc-btn.is-downloading {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.blt-doc-btn-icon {
+	font-size: 1.05em;
+}
+
+.blt-doc-empty {
+	margin: 1em 0;
+	font-style: italic;
+	opacity: 0.8;
+}
+
+/* Stack to cards on narrow screens. */
+@media screen and (max-width: 600px) {
+	.blt-doc-table,
+	.blt-doc-table thead,
+	.blt-doc-table tbody,
+	.blt-doc-table tr,
+	.blt-doc-table th,
+	.blt-doc-table td {
+		display: block;
+	}
+
+	.blt-doc-table thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+	}
+
+	.blt-doc-row {
+		margin: 0 0 1em;
+		border: 1px solid rgba(0, 0, 0, 0.12);
+		border-radius: 8px;
+		padding: 0.25em 0;
+	}
+
+	.blt-doc-cell {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1em;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+	}
+
+	.blt-doc-row .blt-doc-cell:last-child {
+		border-bottom: 0;
+	}
+
+	.blt-doc-cell::before {
+		content: attr(data-label);
+		font-weight: 600;
+		opacity: 0.7;
+	}
+
+	.blt-doc-download {
+		text-align: right;
+	}
+}

@@ -1,0 +1,23 @@
+{
+  "name": "blt-documents-worker",
+  "version": "2026.07.01.0001",
+  "description": "Cloudflare Worker that gates a private R2 bucket for the BLT Documents WordPress plugin (HMAC-signed, short-TTL access).",
+  "private": true,
+  "author": "Shane Skwarek / S-FX.com",
+  "license": "GPL-2.0-or-later",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260101.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.4.0",
+    "wrangler": "^3.60.0"
+  }
+}
