@@ -1,0 +1,16 @@
+# Dependencies
+/vendor/
+/node_modules/
+/worker/node_modules/
+
+# Build artifacts
+/build/
+*.zip
+
+# Tooling
+.phpunit.result.cache
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log

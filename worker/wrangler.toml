@@ -1,0 +1,36 @@
+# Wrangler configuration for the BLT Documents Worker.
+#
+# The Worker gates a PRIVATE R2 bucket. Objects have no public URL and no
+# custom-domain binding — the only way to read or write them is a short-TTL,
+# HMAC-signed request from the BLT Documents WordPress plugin.
+
+name = "blt-documents"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+workers_dev = false
+
+# Deploy to a zone route on the S-FX account. R2 does not require a zone, but
+# the S-FX convention serves the Worker from a first-party hostname.
+[[routes]]
+pattern = "docs.s-fx.com/*"
+zone_name = "s-fx.com"
+
+# Private bucket — create it once with: `wrangler r2 bucket create blt-documents`
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "blt-documents"
+
+# WORKER_SECRET is a SECRET, not a plaintext var. Set it out of band with:
+#   wrangler secret put WORKER_SECRET
+# and paste the SAME value into the plugin's Settings → Worker Secret field.
+# Do NOT commit the secret value here.
+
+# Optional freshness window (seconds); must match the plugin's MAX_SKEW (300).
+# [vars]
+# MAX_SKEW = "300"
+
+[observability]
+enabled = true
+
+[placement]
+mode = "smart"
