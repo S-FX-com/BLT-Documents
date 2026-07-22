@@ -119,3 +119,22 @@ export function isSafeKey(key: unknown): key is string {
 		!key.startsWith('/')
 	);
 }
+
+/**
+ * Whether a key lives under the signed site's namespace.
+ *
+ * The plugin builds every key as `{site-id}/…` and signs `site` in the control
+ * payload, so a request can only ever touch its own prefix. Note: with a shared
+ * WORKER_SECRET this binds the key to the *claimed* site but does not
+ * cryptographically isolate tenants from one another — for untrusted
+ * multi-tenancy give each site its own secret (see DEPLOY.md).
+ *
+ * @param key  Candidate object key.
+ * @param site Signed site id from the control payload.
+ */
+export function keyInSite(key: string, site: string | undefined): boolean {
+	if (typeof site !== 'string' || !/^[a-z0-9_-]+$/.test(site)) {
+		return false;
+	}
+	return key === site || key.startsWith(site + '/');
+}

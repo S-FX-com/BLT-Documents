@@ -393,6 +393,10 @@ class BLT_Documents_Admin {
 			return;
 		}
 
+		// The folder holds no active documents, but it may still hold trashed
+		// ones (whose history is retained). Move them to Uncategorized so no
+		// file row is orphaned under a deleted folder_id.
+		BLT_Documents_Files::reassign_folder( $id, 0 );
 		BLT_Documents_Folders::delete( $id );
 
 		$this->redirect_with_notice( self::MENU_SLUG, 'folder_deleted' );

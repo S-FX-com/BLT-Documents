@@ -164,8 +164,13 @@ class BLT_Documents_REST {
 		header( 'Referrer-Policy: no-referrer', true );
 
 		// Flush any buffered output so the binary stream is not corrupted.
+		// Break out if a buffer is non-removable (e.g. a caching plugin's), so
+		// this can never spin — ob_end_clean() returns false without lowering
+		// the level in that case.
 		while ( ob_get_level() > 0 ) {
-			ob_end_clean();
+			if ( ! ob_end_clean() ) {
+				break;
+			}
 		}
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Streaming a local temp file to the client.

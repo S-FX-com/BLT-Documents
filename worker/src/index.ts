@@ -12,7 +12,7 @@
  *   /v1/put     — store an uploaded object (integrity-checked via its SHA-256).
  */
 
-import { Control, decodeControl, isFresh, isSafeKey, verifySignature } from './auth';
+import { Control, decodeControl, isFresh, isSafeKey, keyInSite, verifySignature } from './auth';
 
 export interface Env {
 	/** Private R2 bucket holding the documents. Bound in wrangler.toml. */
@@ -115,6 +115,9 @@ async function handleGet(request: Request, env: Env): Promise<Response> {
 	if (!isSafeKey(key)) {
 		return jsonError('Invalid key.', 400);
 	}
+	if (!keyInSite(key, auth.control.site)) {
+		return jsonError('Key/site mismatch.', 403);
+	}
 
 	const object = await env.BUCKET.get(key);
 	if (!object) {
@@ -141,6 +144,9 @@ async function handlePut(request: Request, env: Env): Promise<Response> {
 	const { key, sha256, content_type: contentType } = auth.control;
 	if (!isSafeKey(key)) {
 		return jsonError('Invalid key.', 400);
+	}
+	if (!keyInSite(key, auth.control.site)) {
+		return jsonError('Key/site mismatch.', 403);
 	}
 
 	if (!request.body) {

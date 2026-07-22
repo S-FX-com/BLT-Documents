@@ -73,12 +73,31 @@ npm test        # known-vector tests: SHA-256, HMAC, freshness, control decode
 npm run typecheck
 ```
 
+## Multi-tenancy & isolation
+
+One Worker + one bucket can serve many sites; each site's objects live under its
+own `{site-id}/…` key prefix, and the Worker enforces that a request's key
+matches the `site` it signed (`keyInSite`). That prevents a site from
+*accidentally* touching another prefix.
+
+However, with a **single shared `WORKER_SECRET`** this is not cryptographic
+tenant isolation: any party that can recover the shared secret (e.g. one
+tenant's WordPress DB + salts, or an operator) can mint a valid signature for
+any `site` value. For deployments where the client sites are **not** mutually
+trusted, isolate them properly:
+
+- Give each site its **own `WORKER_SECRET`** (deploy a Worker per site, or
+  extend the Worker to look secrets up per site — e.g. a KV/D1 `site_id → secret
+  hash` map, mirroring the BLT-Secure fleet pattern), **or**
+- Give each site its **own bucket** (or a scoped R2 credential).
+
+For a single S-FX-managed board (the primary use case), the shared secret is
+acceptable — all sites are first-party.
+
 ## Notes
 
 - Replay protection is the ±300s freshness window + HTTPS (no server-side
   nonce cache), matching the BLT fleet convention. Keep `MAX_SKEW` (default
   300) identical on both ends.
-- One Worker + one bucket serves all sites; each site's objects live under its
-  own `{site-id}/…` key prefix.
 - Prior versions are never deleted by the plugin — object lifecycle is managed
   in Cloudflare if ever needed.

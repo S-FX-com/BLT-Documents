@@ -15,6 +15,7 @@ import {
 	verifySignature,
 	decodeControl,
 	isSafeKey,
+	keyInSite,
 } from '../src/auth';
 
 function base64url(input: string): string {
@@ -77,4 +78,16 @@ test('isSafeKey rejects traversal, leading slash, and bad chars', () => {
 	assert.equal(isSafeKey('has space'), false);
 	assert.equal(isSafeKey(''), false);
 	assert.equal(isSafeKey(123 as unknown), false);
+});
+
+test('keyInSite scopes a key to its signed site prefix', () => {
+	assert.equal(keyInSite('abc123/governing/5-bylaws/v1.pdf', 'abc123'), true);
+	// A key for a different site must be rejected.
+	assert.equal(keyInSite('victim9/governing/5-bylaws/v1.pdf', 'abc123'), false);
+	// A prefix that is not a full path segment must not match.
+	assert.equal(keyInSite('abc1234/x/v1.pdf', 'abc123'), false);
+	// Missing / malformed site is rejected.
+	assert.equal(keyInSite('abc123/x/v1.pdf', undefined), false);
+	assert.equal(keyInSite('abc123/x/v1.pdf', ''), false);
+	assert.equal(keyInSite('abc123/x/v1.pdf', 'ABC/../'), false);
 });

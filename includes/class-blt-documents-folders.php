@@ -48,9 +48,9 @@ class BLT_Documents_Folders {
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$wpdb->insert( self::table(), $data );
+		$ok = $wpdb->insert( self::table(), $data );
 
-		return (int) $wpdb->insert_id;
+		return false === $ok ? 0 : (int) $wpdb->insert_id;
 	}
 
 	/**

@@ -55,9 +55,9 @@ class BLT_Documents_Files {
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$wpdb->insert( self::table(), $row );
+		$ok = $wpdb->insert( self::table(), $row );
 
-		return (int) $wpdb->insert_id;
+		return false === $ok ? 0 : (int) $wpdb->insert_id;
 	}
 
 	/**
@@ -234,6 +234,26 @@ class BLT_Documents_Files {
 	 */
 	public static function trash( $id ) {
 		return self::update( $id, array( 'status' => 'trashed' ) );
+	}
+
+	/**
+	 * Move every file (any status, including trashed) from one folder to
+	 * another. Used when a folder is deleted so no file row is left pointing at
+	 * a non-existent folder_id.
+	 *
+	 * @param int $from_folder_id Source folder id.
+	 * @param int $to_folder_id   Destination folder id (0 = Uncategorized).
+	 * @return void
+	 */
+	public static function reassign_folder( $from_folder_id, $to_folder_id ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->update(
+			self::table(),
+			array( 'folder_id' => absint( $to_folder_id ) ),
+			array( 'folder_id' => absint( $from_folder_id ) )
+		);
 	}
 
 	/**

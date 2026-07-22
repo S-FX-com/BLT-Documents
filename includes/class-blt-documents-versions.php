@@ -69,9 +69,26 @@ class BLT_Documents_Versions {
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$wpdb->insert( self::table(), $row );
+		$ok = $wpdb->insert( self::table(), $row );
 
-		return (int) $wpdb->insert_id;
+		// Return 0 on failure (e.g. the UNIQUE(file_id, version_number) guard
+		// firing under a concurrent upload) so callers can retry — never a
+		// stale insert_id from an earlier successful insert.
+		return false === $ok ? 0 : (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Delete a single version row by id (used to roll back a failed upload
+	 * reservation before any bytes are committed).
+	 *
+	 * @param int $id Version id.
+	 * @return void
+	 */
+	public static function delete( $id ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->delete( self::table(), array( 'id' => absint( $id ) ) );
 	}
 
 	/**

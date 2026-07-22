@@ -166,8 +166,14 @@ class BLT_Documents_Uploader {
 	}
 
 	/**
-	 * Shared version-persistence core: build key, push to R2, record version,
-	 * repoint current version.
+	 * Shared version-persistence core.
+	 *
+	 * Order matters for correctness under concurrency: the version number (and
+	 * therefore the R2 key) is RESERVED by inserting the version row first,
+	 * relying on the UNIQUE(file_id, version_number) index to serialize racing
+	 * uploads. Only once a number is exclusively ours do we write the bytes to
+	 * R2 — so two concurrent uploads can never derive the same object key, and
+	 * a failed upload is rolled back rather than left as an orphaned object.
 	 *
 	 * @param object $file          File row.
 	 * @param string $path          Local source path.
@@ -181,33 +187,45 @@ class BLT_Documents_Uploader {
 		$folder      = $file->folder_id ? BLT_Documents_Folders::get( $file->folder_id ) : null;
 		$folder_slug = $folder ? $folder->slug : 'root';
 		$file_slug   = BLT_Documents_Files::file_slug( $file );
-		$version_no  = BLT_Documents_Versions::next_version_number( $file->id );
-		$key         = BLT_Documents_Worker_Client::object_key( $folder_slug, $file_slug, $version_no, $ext );
 		$sha256      = hash_file( 'sha256', $path );
 		$size        = (int) filesize( $path );
 
+		// Reserve a version number + key atomically. On a UNIQUE collision with
+		// a concurrent upload, create() returns 0; re-read the next number and
+		// retry so both uploads end up with distinct numbers/keys.
+		$version_id = 0;
+		$key        = '';
+
+		for ( $attempt = 0; $attempt < 5 && ! $version_id; $attempt++ ) {
+			$version_no = BLT_Documents_Versions::next_version_number( $file->id );
+			$key        = BLT_Documents_Worker_Client::object_key( $folder_slug, $file_slug, $version_no, $ext );
+
+			$version_id = BLT_Documents_Versions::create(
+				array(
+					'file_id'           => $file->id,
+					'version_number'    => $version_no,
+					'r2_key'            => $key,
+					'original_filename' => $original_name,
+					'mime_type'         => $mime,
+					'file_size'         => $size,
+					'sha256'            => $sha256,
+					'uploaded_by'       => get_current_user_id(),
+					'notes'             => $notes,
+				)
+			);
+		}
+
+		if ( ! $version_id ) {
+			return new WP_Error( 'blt_documents_version_failed', __( 'Could not reserve a version number for this document. Please try again.', 'blt-documents' ) );
+		}
+
+		// The number/key is now exclusively ours — write the bytes.
 		$put = BLT_Documents_Worker_Client::put_object( $key, $path, $mime, $sha256 );
 
 		if ( is_wp_error( $put ) ) {
+			// Roll back the reservation; no bytes were committed to R2.
+			BLT_Documents_Versions::delete( $version_id );
 			return $put;
-		}
-
-		$version_id = BLT_Documents_Versions::create(
-			array(
-				'file_id'           => $file->id,
-				'version_number'    => $version_no,
-				'r2_key'            => $key,
-				'original_filename' => $original_name,
-				'mime_type'         => $mime,
-				'file_size'         => $size,
-				'sha256'            => $sha256,
-				'uploaded_by'       => get_current_user_id(),
-				'notes'             => $notes,
-			)
-		);
-
-		if ( ! $version_id ) {
-			return new WP_Error( 'blt_documents_version_failed', __( 'The file was stored but the version record could not be saved.', 'blt-documents' ) );
 		}
 
 		BLT_Documents_Files::set_current_version( $file->id, $version_id );

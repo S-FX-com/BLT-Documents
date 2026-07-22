@@ -47,10 +47,13 @@ plugin makes to the Worker carries:
 - `X-BLT-Signature: <lowercase-hex HMAC-SHA256 of "{ts}.{control_b64}">`
 
 `op` and `key` live inside the signed string, so a captured request cannot be
-replayed against a different object or operation. Uploads are memory-safe: the
-signature covers the file's SHA-256 (not its bytes), and R2 verifies the
+replayed against a different object or operation. The Worker also enforces that
+`key` is under the signed `site` prefix (`keyInSite`). Uploads are memory-safe:
+the signature covers the file's SHA-256 (not its bytes), and R2 verifies the
 content against that hash on `put`. Freshness window is ±300s (`MAX_SKEW`),
-identical on both ends.
+identical on both ends. Note: with a single shared `WORKER_SECRET`, `site`
+scoping is not cryptographic tenant isolation — see `worker/DEPLOY.md` for the
+per-site-secret hardening path if client sites are mutually untrusted.
 
 - PHP signer: `includes/class-blt-documents-signer.php`
 - TS verifier: `worker/src/auth.ts` (with known-vector tests in
