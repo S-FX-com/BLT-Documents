@@ -1,5 +1,10 @@
 /**
  * BLT Documents — admin styles.
+ *
+ * Layered on top of assets/css/blt-design-system.css (enqueued as a
+ * dependency), which supplies the page shell, cards, field rows, toggles and
+ * badges. Only screen-specific layout lives here, and colours come from the
+ * design system's tokens.
  */
 
 .blt-doc-admin-layout {
@@ -11,18 +16,6 @@
 
 .blt-doc-sidebar {
 	flex: 0 0 240px;
-	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 6px;
-	padding: 16px;
-}
-
-.blt-doc-sidebar h2 {
-	margin-top: 0;
-	font-size: 14px;
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
-	color: #50575e;
 }
 
 .blt-doc-main {
@@ -38,58 +31,37 @@
 
 .blt-doc-folder-list li {
 	margin: 0;
-	border-radius: 4px;
+	border-radius: var(--blt-radius-sm, 4px);
 }
 
 .blt-doc-folder-list li a {
 	display: block;
 	padding: 8px 10px;
 	text-decoration: none;
-	color: #2271b1;
-	border-radius: 4px;
+	color: var(--blt-primary, #2271b1);
+	border-radius: var(--blt-radius-sm, 4px);
 }
 
 .blt-doc-folder-list li.is-active a {
-	background: #2271b1;
+	background: var(--blt-primary, #2271b1);
 	color: #fff;
 	font-weight: 600;
 }
 
 .blt-doc-folder-list li.blt-doc-muted,
 .blt-doc-muted {
-	color: #787c82;
+	color: var(--blt-muted-fg, #646970);
 	padding: 8px 10px;
 }
 
-.blt-doc-panel {
-	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 6px;
-	padding: 16px 20px;
-	margin-bottom: 20px;
-}
-
-.blt-doc-panel h2 {
-	margin-top: 0;
-}
-
-.blt-doc-folder-head {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 12px;
-	align-items: center;
-	justify-content: space-between;
-}
-
-.blt-doc-folder-head h2 {
-	margin: 0;
-}
-
+/* Rename / delete controls in the folder card's header, pushed to the right
+   of the card title the way .blt-card-header-badges is. */
 .blt-doc-folder-tools {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 	align-items: center;
+	margin-left: auto;
 }
 
 .blt-doc-inline-form {
@@ -97,12 +69,6 @@
 	gap: 6px;
 	align-items: center;
 	margin: 0;
-}
-
-.blt-doc-shortcode {
-	margin-top: 16px;
-	padding-top: 12px;
-	border-top: 1px solid #f0f0f1;
 }
 
 .blt-doc-shortcode input.code {
@@ -126,17 +92,11 @@
 }
 
 .blt-doc-test-result.is-ok {
-	color: #007017;
+	color: var(--blt-success-fg, #005c12);
 }
 
 .blt-doc-test-result.is-error {
-	color: #b32d2e;
-}
-
-.blt-doc-current-tag {
-	color: #007017;
-	font-weight: 600;
-	font-size: 0.9em;
+	color: var(--blt-danger-fg, #8a2424);
 }
 
 @media screen and (max-width: 782px) {

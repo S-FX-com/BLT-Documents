@@ -55,6 +55,7 @@ class BLT_Documents_Admin {
 	 */
 	public function init() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
+		add_action( 'admin_head', array( $this, 'print_menu_icon_style' ) );
 		add_action( 'admin_init', array( $this, 'handle_settings_post' ) );
 		add_action( 'admin_init', array( $this, 'handle_action_post' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -75,7 +76,7 @@ class BLT_Documents_Admin {
 			self::CAP,
 			self::MENU_SLUG,
 			array( $this, 'render_documents_page' ),
-			'dashicons-media-document',
+			BLT_Family_Brand::menu_icon( BLT_DOCUMENTS_DIR ),
 			81
 		);
 
@@ -96,6 +97,18 @@ class BLT_Documents_Admin {
 			self::MENU_SLUG . '-settings',
 			array( $this, 'render_settings_page' )
 		);
+	}
+
+	/**
+	 * Brighten the BLT menu mark on hover / while the section is open.
+	 *
+	 * WordPress paints an SVG icon_url as a background image and never
+	 * recolours it, so this restores the lit state a dashicon gets for free.
+	 *
+	 * @return void
+	 */
+	public function print_menu_icon_style() {
+		BLT_Family_Brand::print_menu_icon_style( self::MENU_SLUG );
 	}
 
 	/**
@@ -124,9 +137,16 @@ class BLT_Documents_Admin {
 		}
 
 		wp_enqueue_style(
+			'blt-documents-design-system',
+			BLT_DOCUMENTS_URL . 'assets/css/blt-design-system.css',
+			array(),
+			BLT_DOCUMENTS_VERSION
+		);
+
+		wp_enqueue_style(
 			'blt-documents-admin',
 			BLT_DOCUMENTS_URL . 'admin/assets/blt-admin.css',
-			array(),
+			array( 'blt-documents-design-system' ),
 			BLT_DOCUMENTS_VERSION
 		);
 
@@ -273,6 +293,18 @@ class BLT_Documents_Admin {
 		$settings   = BLT_Documents_Settings::all();
 		$has_secret = '' !== (string) BLT_Documents_Settings::get( 'worker_secret' );
 		$strong     = BLT_Documents_Crypto::is_strong();
+		$configured = BLT_Documents_Settings::is_configured();
+
+		// Manual update check. The automatic check runs once a day at midnight
+		// site time (BLT_Family_Updates); this link bypasses that floor. The
+		// checker instance is the global the main plugin file builds it into —
+		// only used to read the last-check timestamp, and skipped if absent.
+		$update_url = class_exists( 'BLT_Family_Updates' )
+			? BLT_Family_Updates::check_now_url( 'blt-documents' )
+			: '';
+		$last_check = ( '' !== $update_url && isset( $GLOBALS['blt_documents_update_checker'] ) )
+			? BLT_Family_Updates::last_check_time( $GLOBALS['blt_documents_update_checker'] )
+			: 0;
 
 		require BLT_DOCUMENTS_DIR . 'admin/views/settings.php';
 	}
