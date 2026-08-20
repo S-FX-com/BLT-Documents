@@ -3,7 +3,7 @@
   "version": "2026.07.01.0001",
   "description": "Cloudflare Worker that gates a private R2 bucket for the BLT Documents WordPress plugin (HMAC-signed, short-TTL access).",
   "private": true,
-  "author": "Shane Skwarek / S-FX.com",
+  "author": "S-FX.com",
   "license": "GPL-2.0-or-later",
   "type": "module",
   "main": "src/index.ts",

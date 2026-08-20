@@ -27,8 +27,24 @@ foreach ( $folders as $blt_f ) {
 $blt_shortcode = $blt_current ? '[blt_documents folder="' . $blt_current->slug . '"]' : '[blt_documents]';
 $blt_can_hist  = current_user_can( BLT_Documents_Roles::CAP_HISTORY );
 ?>
-<div class="wrap blt-documents-wrap">
-	<h1><?php esc_html_e( 'BLT Documents', 'blt-documents' ); ?></h1>
+<div class="wrap blt-ui blt-ui-wide blt-documents-wrap">
+	<div class="blt-admin-page-header">
+		<h1>
+			<?php
+			// Pre-built, KSES-filtered SVG markup from the shared brand class.
+			echo BLT_Family_Brand::inline_mark( BLT_DOCUMENTS_DIR ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized in inline_mark().
+			?>
+			<?php esc_html_e( 'BLT Documents', 'blt-documents' ); ?>
+		</h1>
+		<div class="blt-admin-page-actions">
+			<?php if ( $configured ) : ?>
+				<span class="blt-badge blt-badge-on"><?php esc_html_e( 'Worker connected', 'blt-documents' ); ?></span>
+			<?php else : ?>
+				<span class="blt-badge blt-badge-off"><?php esc_html_e( 'Worker not connected', 'blt-documents' ); ?></span>
+			<?php endif; ?>
+			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=' . $blt_menu . '-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'blt-documents' ); ?></a>
+		</div>
+	</div>
 
 	<?php if ( ! $configured ) : ?>
 		<div class="notice notice-warning">
@@ -46,40 +62,49 @@ $blt_can_hist  = current_user_can( BLT_Documents_Roles::CAP_HISTORY );
 
 	<div class="blt-doc-admin-layout">
 		<!-- Folders sidebar -->
-		<aside class="blt-doc-sidebar">
-			<h2><?php esc_html_e( 'Folders', 'blt-documents' ); ?></h2>
-			<ul class="blt-doc-folder-list">
-				<?php foreach ( $folders as $blt_folder ) : ?>
-					<li class="<?php echo ( (int) $blt_folder->id === (int) $current_folder ) ? 'is-active' : ''; ?>">
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $blt_menu . '&folder=' . absint( $blt_folder->id ) ) ); ?>">
-							<?php echo esc_html( $blt_folder->name ); ?>
-						</a>
-					</li>
-				<?php endforeach; ?>
-				<?php if ( empty( $folders ) ) : ?>
-					<li class="blt-doc-muted"><?php esc_html_e( 'No folders yet.', 'blt-documents' ); ?></li>
-				<?php endif; ?>
-			</ul>
+		<aside class="blt-doc-sidebar blt-card">
+			<div class="blt-card-header">
+				<h2><?php esc_html_e( 'Folders', 'blt-documents' ); ?></h2>
+			</div>
+			<div class="blt-card-body">
+				<ul class="blt-doc-folder-list">
+					<?php foreach ( $folders as $blt_folder ) : ?>
+						<li class="<?php echo ( (int) $blt_folder->id === (int) $current_folder ) ? 'is-active' : ''; ?>">
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $blt_menu . '&folder=' . absint( $blt_folder->id ) ) ); ?>">
+								<?php echo esc_html( $blt_folder->name ); ?>
+							</a>
+						</li>
+					<?php endforeach; ?>
+					<?php if ( empty( $folders ) ) : ?>
+						<li class="blt-doc-muted"><?php esc_html_e( 'No folders yet.', 'blt-documents' ); ?></li>
+					<?php endif; ?>
+				</ul>
 
-			<form method="post" class="blt-doc-inline-form">
-				<?php wp_nonce_field( BLT_Documents_Admin::NONCE_ACTION, BLT_Documents_Admin::NONCE_FIELD ); ?>
-				<input type="hidden" name="blt_documents_action" value="add_folder" />
-				<label class="screen-reader-text" for="blt-new-folder"><?php esc_html_e( 'New folder name', 'blt-documents' ); ?></label>
-				<input type="text" id="blt-new-folder" name="folder_name" class="regular-text" placeholder="<?php esc_attr_e( 'New folder name', 'blt-documents' ); ?>" />
-				<button type="submit" class="button"><?php esc_html_e( 'Add Folder', 'blt-documents' ); ?></button>
-			</form>
+				<form method="post" class="blt-doc-inline-form">
+					<?php wp_nonce_field( BLT_Documents_Admin::NONCE_ACTION, BLT_Documents_Admin::NONCE_FIELD ); ?>
+					<input type="hidden" name="blt_documents_action" value="add_folder" />
+					<label class="screen-reader-text" for="blt-new-folder"><?php esc_html_e( 'New folder name', 'blt-documents' ); ?></label>
+					<input type="text" id="blt-new-folder" name="folder_name" class="regular-text" placeholder="<?php esc_attr_e( 'New folder name', 'blt-documents' ); ?>" />
+					<button type="submit" class="button"><?php esc_html_e( 'Add Folder', 'blt-documents' ); ?></button>
+				</form>
+			</div>
 		</aside>
 
 		<!-- Main panel -->
 		<div class="blt-doc-main">
 			<?php if ( ! $blt_current ) : ?>
-				<div class="blt-doc-panel">
-					<p><?php esc_html_e( 'Create a folder to start adding documents.', 'blt-documents' ); ?></p>
+				<div class="blt-card">
+					<div class="blt-card-body">
+						<div class="blt-empty">
+							<span class="blt-empty-title"><?php esc_html_e( 'No folder selected', 'blt-documents' ); ?></span>
+							<span><?php esc_html_e( 'Create a folder to start adding documents.', 'blt-documents' ); ?></span>
+						</div>
+					</div>
 				</div>
 			<?php else : ?>
 
-				<div class="blt-doc-panel">
-					<div class="blt-doc-folder-head">
+				<div class="blt-card">
+					<div class="blt-card-header">
 						<h2><?php echo esc_html( $blt_current->name ); ?></h2>
 						<div class="blt-doc-folder-tools">
 							<form method="post" class="blt-doc-inline-form" onsubmit="return true;">
@@ -99,95 +124,116 @@ $blt_can_hist  = current_user_can( BLT_Documents_Roles::CAP_HISTORY );
 					</div>
 
 					<!-- Shortcode generator -->
-					<div class="blt-doc-shortcode">
-						<label for="blt-doc-sc"><strong><?php esc_html_e( 'Shortcode', 'blt-documents' ); ?></strong></label>
-						<input type="text" id="blt-doc-sc" class="regular-text code" readonly value="<?php echo esc_attr( $blt_shortcode ); ?>" />
-						<button type="button" class="button blt-doc-copy" data-target="blt-doc-sc"><?php esc_html_e( 'Copy', 'blt-documents' ); ?></button>
-						<p class="description"><?php esc_html_e( 'Paste this into any page to display this folder’s current documents.', 'blt-documents' ); ?></p>
+					<div class="blt-card-body">
+						<div class="blt-doc-shortcode">
+							<label for="blt-doc-sc"><strong><?php esc_html_e( 'Shortcode', 'blt-documents' ); ?></strong></label>
+							<input type="text" id="blt-doc-sc" class="regular-text code" readonly value="<?php echo esc_attr( $blt_shortcode ); ?>" />
+							<button type="button" class="button blt-doc-copy" data-target="blt-doc-sc"><?php esc_html_e( 'Copy', 'blt-documents' ); ?></button>
+							<p class="blt-field-desc"><?php esc_html_e( 'Paste this into any page to display this folder’s current documents.', 'blt-documents' ); ?></p>
+						</div>
 					</div>
 				</div>
 
 				<!-- Add document -->
-				<div class="blt-doc-panel">
-					<h2><?php esc_html_e( 'Add Document', 'blt-documents' ); ?></h2>
-					<form method="post" enctype="multipart/form-data" class="blt-doc-add-form">
-						<?php wp_nonce_field( BLT_Documents_Admin::NONCE_ACTION, BLT_Documents_Admin::NONCE_FIELD ); ?>
-						<input type="hidden" name="blt_documents_action" value="add_file" />
-						<input type="hidden" name="folder_id" value="<?php echo absint( $blt_current->id ); ?>" />
+				<div class="blt-card">
+					<div class="blt-card-header">
+						<h2><?php esc_html_e( 'Add Document', 'blt-documents' ); ?></h2>
+						<p><?php esc_html_e( 'The uploaded file becomes version 1. Replacing it later keeps this version in history.', 'blt-documents' ); ?></p>
+					</div>
+					<div class="blt-card-body">
+						<form method="post" enctype="multipart/form-data" class="blt-doc-add-form">
+							<?php wp_nonce_field( BLT_Documents_Admin::NONCE_ACTION, BLT_Documents_Admin::NONCE_FIELD ); ?>
+							<input type="hidden" name="blt_documents_action" value="add_file" />
+							<input type="hidden" name="folder_id" value="<?php echo absint( $blt_current->id ); ?>" />
 
-						<table class="form-table" role="presentation">
-							<tr>
-								<th scope="row"><label for="blt-file-title"><?php esc_html_e( 'Title', 'blt-documents' ); ?></label></th>
-								<td><input type="text" id="blt-file-title" name="title" class="regular-text" required /></td>
-							</tr>
-							<tr>
-								<th scope="row"><label for="blt-file-type"><?php esc_html_e( 'File Type', 'blt-documents' ); ?></label></th>
-								<td><?php blt_documents_file_type_select( 'file_type', '', $file_types ); ?></td>
-							</tr>
-							<tr>
-								<th scope="row"><label for="blt-file-status"><?php esc_html_e( 'Status', 'blt-documents' ); ?></label></th>
-								<td><?php blt_documents_status_select( 'status', 'published' ); ?></td>
-							</tr>
-							<tr>
-								<th scope="row"><label for="blt-file-upload"><?php esc_html_e( 'File', 'blt-documents' ); ?></label></th>
-								<td><input type="file" id="blt-file-upload" name="document" required /></td>
-							</tr>
-							<tr>
-								<th scope="row"><label for="blt-file-notes"><?php esc_html_e( 'Version note', 'blt-documents' ); ?></label></th>
-								<td><input type="text" id="blt-file-notes" name="notes" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. Initial upload', 'blt-documents' ); ?>" /></td>
-							</tr>
-						</table>
+							<div class="blt-field">
+								<div class="blt-field-label"><label for="blt-file-title"><?php esc_html_e( 'Title', 'blt-documents' ); ?></label></div>
+								<div><input type="text" id="blt-file-title" name="title" class="regular-text" required /></div>
+							</div>
+							<div class="blt-field">
+								<div class="blt-field-label"><label for="blt-file-type"><?php esc_html_e( 'File Type', 'blt-documents' ); ?></label></div>
+								<div><?php blt_documents_file_type_select( 'file_type', '', $file_types ); ?></div>
+							</div>
+							<div class="blt-field">
+								<div class="blt-field-label"><label for="blt-file-status"><?php esc_html_e( 'Status', 'blt-documents' ); ?></label></div>
+								<div><?php blt_documents_status_select( 'status', 'published' ); ?></div>
+							</div>
+							<div class="blt-field">
+								<div class="blt-field-label"><label for="blt-file-upload"><?php esc_html_e( 'File', 'blt-documents' ); ?></label></div>
+								<div><input type="file" id="blt-file-upload" name="document" required /></div>
+							</div>
+							<div class="blt-field">
+								<div class="blt-field-label"><label for="blt-file-notes"><?php esc_html_e( 'Version note', 'blt-documents' ); ?></label></div>
+								<div><input type="text" id="blt-file-notes" name="notes" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. Initial upload', 'blt-documents' ); ?>" /></div>
+							</div>
 
-						<?php submit_button( __( 'Add Document', 'blt-documents' ), 'primary', 'blt_add_file_submit', false, $configured ? array() : array( 'disabled' => 'disabled' ) ); ?>
-					</form>
+							<div class="blt-settings-footer">
+								<?php submit_button( __( 'Add Document', 'blt-documents' ), 'primary blt-save-button', 'blt_add_file_submit', false, $configured ? array() : array( 'disabled' => 'disabled' ) ); ?>
+							</div>
+						</form>
+					</div>
 				</div>
 
 				<!-- File list -->
-				<div class="blt-doc-panel">
-					<h2><?php esc_html_e( 'Documents', 'blt-documents' ); ?></h2>
-					<table class="wp-list-table widefat fixed striped">
-						<thead>
-							<tr>
-								<th><?php esc_html_e( 'Title', 'blt-documents' ); ?></th>
-								<th><?php esc_html_e( 'File Type', 'blt-documents' ); ?></th>
-								<th><?php esc_html_e( 'Last Updated', 'blt-documents' ); ?></th>
-								<th><?php esc_html_e( 'Version', 'blt-documents' ); ?></th>
-								<th><?php esc_html_e( 'Status', 'blt-documents' ); ?></th>
-								<th><?php esc_html_e( 'Actions', 'blt-documents' ); ?></th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php if ( empty( $files ) ) : ?>
-								<tr><td colspan="6"><?php esc_html_e( 'No documents in this folder yet.', 'blt-documents' ); ?></td></tr>
-							<?php endif; ?>
-							<?php
-							foreach ( $files as $blt_file ) :
-								$blt_version = $blt_file->current_version_id ? BLT_Documents_Versions::get( $blt_file->current_version_id ) : null;
-								$blt_edit    = admin_url( 'admin.php?page=' . $blt_menu . '&action=edit-file&file=' . absint( $blt_file->id ) );
-								$blt_hist    = admin_url( 'admin.php?page=' . $blt_menu . '&action=history&file=' . absint( $blt_file->id ) );
-								?>
-								<tr>
-									<td><strong><?php echo esc_html( $blt_file->title ); ?></strong></td>
-									<td><?php echo esc_html( $blt_file->file_type ); ?></td>
-									<td><?php echo esc_html( $blt_file->updated_at ? mysql2date( get_option( 'date_format' ), $blt_file->updated_at ) : '—' ); ?></td>
-									<td><?php echo $blt_version ? 'v' . absint( $blt_version->version_number ) : '—'; ?></td>
-									<td><?php echo esc_html( ucfirst( $blt_file->status ) ); ?></td>
-									<td class="blt-doc-actions">
-										<a class="button button-small" href="<?php echo esc_url( $blt_edit ); ?>"><?php esc_html_e( 'Edit / Replace', 'blt-documents' ); ?></a>
-										<?php if ( $blt_can_hist ) : ?>
-											<a class="button button-small" href="<?php echo esc_url( $blt_hist ); ?>"><?php esc_html_e( 'History', 'blt-documents' ); ?></a>
-										<?php endif; ?>
-										<form method="post" class="blt-doc-inline-form blt-doc-trash-form">
-											<?php wp_nonce_field( BLT_Documents_Admin::NONCE_ACTION, BLT_Documents_Admin::NONCE_FIELD ); ?>
-											<input type="hidden" name="blt_documents_action" value="trash_file" />
-											<input type="hidden" name="file_id" value="<?php echo absint( $blt_file->id ); ?>" />
-											<button type="submit" class="button button-small button-link-delete blt-doc-trash-btn"><?php esc_html_e( 'Delete', 'blt-documents' ); ?></button>
-										</form>
-									</td>
-								</tr>
-							<?php endforeach; ?>
-						</tbody>
-					</table>
+				<div class="blt-card">
+					<div class="blt-card-header">
+						<h2><?php esc_html_e( 'Documents', 'blt-documents' ); ?></h2>
+					</div>
+					<div class="blt-card-body">
+						<?php if ( empty( $files ) ) : ?>
+							<div class="blt-empty">
+								<span class="blt-empty-title"><?php esc_html_e( 'No documents yet', 'blt-documents' ); ?></span>
+								<span><?php esc_html_e( 'Add one above to make it downloadable on the site.', 'blt-documents' ); ?></span>
+							</div>
+						<?php else : ?>
+							<table class="wp-list-table widefat fixed striped">
+								<thead>
+									<tr>
+										<th><?php esc_html_e( 'Title', 'blt-documents' ); ?></th>
+										<th><?php esc_html_e( 'File Type', 'blt-documents' ); ?></th>
+										<th><?php esc_html_e( 'Last Updated', 'blt-documents' ); ?></th>
+										<th><?php esc_html_e( 'Version', 'blt-documents' ); ?></th>
+										<th><?php esc_html_e( 'Status', 'blt-documents' ); ?></th>
+										<th><?php esc_html_e( 'Actions', 'blt-documents' ); ?></th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									foreach ( $files as $blt_file ) :
+										$blt_version = $blt_file->current_version_id ? BLT_Documents_Versions::get( $blt_file->current_version_id ) : null;
+										$blt_edit    = admin_url( 'admin.php?page=' . $blt_menu . '&action=edit-file&file=' . absint( $blt_file->id ) );
+										$blt_hist    = admin_url( 'admin.php?page=' . $blt_menu . '&action=history&file=' . absint( $blt_file->id ) );
+										?>
+										<tr>
+											<td><strong><?php echo esc_html( $blt_file->title ); ?></strong></td>
+											<td><?php echo esc_html( $blt_file->file_type ); ?></td>
+											<td><?php echo esc_html( $blt_file->updated_at ? mysql2date( get_option( 'date_format' ), $blt_file->updated_at ) : '—' ); ?></td>
+											<td><?php echo $blt_version ? 'v' . absint( $blt_version->version_number ) : '—'; ?></td>
+											<td>
+												<?php if ( 'published' === $blt_file->status ) : ?>
+													<span class="blt-badge blt-badge-on"><?php esc_html_e( 'Published', 'blt-documents' ); ?></span>
+												<?php else : ?>
+													<span class="blt-badge blt-badge-off"><?php esc_html_e( 'Draft', 'blt-documents' ); ?></span>
+												<?php endif; ?>
+											</td>
+											<td class="blt-doc-actions">
+												<a class="button button-small" href="<?php echo esc_url( $blt_edit ); ?>"><?php esc_html_e( 'Edit / Replace', 'blt-documents' ); ?></a>
+												<?php if ( $blt_can_hist ) : ?>
+													<a class="button button-small" href="<?php echo esc_url( $blt_hist ); ?>"><?php esc_html_e( 'History', 'blt-documents' ); ?></a>
+												<?php endif; ?>
+												<form method="post" class="blt-doc-inline-form blt-doc-trash-form">
+													<?php wp_nonce_field( BLT_Documents_Admin::NONCE_ACTION, BLT_Documents_Admin::NONCE_FIELD ); ?>
+													<input type="hidden" name="blt_documents_action" value="trash_file" />
+													<input type="hidden" name="file_id" value="<?php echo absint( $blt_file->id ); ?>" />
+													<button type="submit" class="button button-small button-link-delete blt-doc-trash-btn"><?php esc_html_e( 'Delete', 'blt-documents' ); ?></button>
+												</form>
+											</td>
+										</tr>
+									<?php endforeach; ?>
+								</tbody>
+							</table>
+						<?php endif; ?>
+					</div>
 				</div>
 
 			<?php endif; ?>
