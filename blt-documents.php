@@ -3,7 +3,7 @@
  * Plugin Name:       BLT Documents
  * Plugin URI:        https://s-fx.com/plugins/blt-documents/
  * Description:       Secure, versioned document delivery for governance boards. Files live in a private Cloudflare R2 bucket behind an HMAC-gated Worker — never crawlable, never hotlinkable, with real version history and role-scoped access to prior versions.
- * Version:           1.0.2
+ * Version:           1.0.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            S-FX.com
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ---------- Constants ----------
-define( 'BLT_DOCUMENTS_VERSION', '1.0.2' );
+define( 'BLT_DOCUMENTS_VERSION', '1.0.1' );
 define( 'BLT_DOCUMENTS_FILE', __FILE__ );
 define( 'BLT_DOCUMENTS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BLT_DOCUMENTS_URL', plugin_dir_url( __FILE__ ) );
